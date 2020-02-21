@@ -76,12 +76,13 @@ class Mondo(object):
     def __init__(self):
         self.mondo = {}
         self.mapper = {}
+        self.read_json()
 
     def __len__(self):
         return len(self.mondo)
 
     def __iter__(self):
-        return iter(self.mondo)
+        return iter(self.mondo.values())
 
     def __getattr__(self, item):
         return self.mondo[item]

@@ -11,6 +11,7 @@ twine = "*"
 setuptools = "*"
 wheel = "*"
 requests = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.8"
