@@ -73,7 +73,7 @@ class MondoNode(object):
 
 
 class Mondo(object):
-    def __init__(self):
+    def __init__(self, ignore_deprecated):
         self.mondo = {}
         self.mapper = {}
         self.read_json()
@@ -84,7 +84,7 @@ class Mondo(object):
     def __iter__(self):
         return iter(self.mondo.values())
 
-    def __getattr__(self, item):
+    def __getitem__(self, item):
         return self.mondo[item]
 
     def read_json(self, fp: Path=Path('/usr/local/share/pymondo/mondo.json')):
