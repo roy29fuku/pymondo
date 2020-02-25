@@ -73,7 +73,7 @@ class MondoNode(object):
 
 
 class Mondo(object):
-    def __init__(self, ignore_deprecated):
+    def __init__(self):
         self.mondo = {}
         self.mapper = {}
         self.read_json()
