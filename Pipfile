@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+jupyter = "*"
 
 [packages]
 chain-norm = "*"
@@ -11,8 +12,6 @@ twine = "*"
 setuptools = "*"
 wheel = "*"
 requests = "*"
-jupyter = "*"
-bleach = ">=3.1.1"
 
 [requires]
 python_version = "3.8"
