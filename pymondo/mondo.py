@@ -8,6 +8,8 @@ from typing import List
 
 from cnorm.chain import Chain
 
+from pymondo.downloader import download
+
 
 class Scope(Enum):
     EXACT = 1
@@ -88,6 +90,10 @@ class Mondo(object):
         return self.mondo[item]
 
     def read_json(self, fp: Path=Path('/usr/local/share/pymondo/mondo.json')):
+        if not fp.exists():
+            # TODO: directory指定
+            download()
+
         with fp.open() as f:
             graphs = json.load(f)['graphs']
         mondo_graph = graphs[0]
