@@ -8,7 +8,8 @@ from typing import List
 
 from cnorm.chain import Chain
 
-from pymondo.downloader import download
+from .downloader import Downloader
+from .data import find
 
 
 class Scope(Enum):
@@ -75,10 +76,14 @@ class MondoNode(object):
 
 
 class Mondo(object):
-    def __init__(self):
+    def __init__(self, resource: str='mondo'):
         self.mondo = {}
         self.mapper = {}
-        self.read_json()
+        self.fp = find(resource)
+        if not self.fp.exists():
+            downloader = Downloader()
+            downloader.download(resource)
+        self.read(self.fp)
 
     def __len__(self):
         return len(self.mondo)
@@ -89,11 +94,7 @@ class Mondo(object):
     def __getitem__(self, item):
         return self.mondo[item]
 
-    def read_json(self, fp: Path=Path('/usr/local/share/pymondo/mondo.json')):
-        if not fp.exists():
-            # TODO: directory指定
-            download()
-
+    def read(self, fp: Path):
         with fp.open() as f:
             graphs = json.load(f)['graphs']
         mondo_graph = graphs[0]
@@ -166,18 +167,3 @@ class Mondo(object):
                 text = chain.apply(synonym.name)
                 mapper[text].add(_id)
         self.mapper = mapper
-
-
-if __name__ == '__main__':
-    mondo = Mondo()
-    mondo.read_json()
-    mondo.make_mapper()
-
-    # search IDs by string
-    pattern = 'cancer'
-    ids = mondo.mapper[pattern]
-    print(ids)
-
-    # show monodo nodes
-    for _id in ids:
-        print(mondo.mondo[_id])
