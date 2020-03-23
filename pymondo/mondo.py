@@ -9,7 +9,7 @@ from typing import List
 from cnorm.chain import Chain
 
 from .downloader import Downloader
-from .data import find
+from .data import find, default_data_dir
 
 
 class Scope(Enum):
@@ -76,12 +76,13 @@ class MondoNode(object):
 
 
 class Mondo(object):
-    def __init__(self, resource: str='mondo'):
+    def __init__(self, resource: str='mondo', data_dir: Path=default_data_dir):
         self.mondo = {}
-        self.mapper = {}
-        self.fp = find(resource)
+        self.name2mondoids = {}
+        self.rid2mondoids = {}
+        self.fp = find(resource, data_dir)
         if not self.fp.exists():
-            downloader = Downloader()
+            downloader = Downloader(data_dir)
             downloader.download(resource)
         self.read(self.fp)
 
@@ -137,33 +138,63 @@ class Mondo(object):
             self.mondo[child].parents.add(parent)
             self.mondo[parent].children.add(child)
 
-    def make_mapper(
+    def make_name2mondoids(
             self, chain: Chain=Chain(),
-            ignore_synonym: bool=True, allowed_scope_list: List[Scope]=Scope.EXACT,
-            ignore_deprecated: bool=True
+            allowed_scope_list: List[Scope]=None,
+            allow_deprecated: bool=False
     ):
-        """return the list of mondos which contain the pattern
+        """make a dictionary which maps noramalized name to mondo ids
         :param chain: chain of rules
-        :param ignore_synonym:
         :param allowed_scope_list:
-        :param ignore_deprecated:
+        :param allow_deprecated:
         :return:
         """
-        mapper = {}
+        name2mondoids = {}
         for _id, mondo_node in self.mondo.items():
-            if ignore_deprecated and mondo_node.deprecated:
+            if mondo_node.deprecated and not allow_deprecated:
                 continue
 
             text = chain.apply(mondo_node.name)
-            mapper.setdefault(text, set())
-            mapper[text].add(_id)
+            name2mondoids.setdefault(text, set())
+            name2mondoids[text].add(_id)
 
-            if ignore_synonym:
+            if not allowed_scope_list:
                 continue
 
             for synonym in mondo_node.synonyms:
                 if synonym.scope not in allowed_scope_list:
                     continue
                 text = chain.apply(synonym.name)
-                mapper[text].add(_id)
-        self.mapper = mapper
+                name2mondoids.setdefault(text, set())
+                name2mondoids[text].add(_id)
+        self.name2mondoids = name2mondoids
+
+    def make_rid2mondoids(
+            self,
+            allowed_scope_list: List[Scope]=None,
+            allow_deprecated: bool=False
+    ):
+        """make a dictionary which maps resource id to mondo ids
+        :param allowed_scope_list:
+        :param allow_deprecated:
+        :return:
+        """
+        rid2mondoids = {}
+        for _id, mondo_node in self.mondo.items():
+            if mondo_node.deprecated and not allow_deprecated:
+                continue
+
+            for xref in mondo_node.xrefs:
+                rid2mondoids.setdefault(xref, set())
+                rid2mondoids[xref].add(_id)
+
+            if not allowed_scope_list:
+                continue
+
+            for synonym in mondo_node.synonyms:
+                if synonym.scope not in allowed_scope_list:
+                    continue
+                for xref in synonym.xrefs:
+                    rid2mondoids.setdefault(xref, set())
+                    rid2mondoids[xref].add(_id)
+        self.rid2mondoids = rid2mondoids

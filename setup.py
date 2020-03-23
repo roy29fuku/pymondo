@@ -8,7 +8,7 @@ with open("requirements.txt") as f:
 
 setuptools.setup(
     name='pymondo',
-    version='0.0.9',
+    version='0.0.14',
     author='Ryota Yamada',
     author_email='roy29fuku@gmail.com',
     description='python wrapper for mondo',
