@@ -135,8 +135,10 @@ class Mondo(object):
             parent = edge['obj'].split('/')[-1]
             if not (child.startswith('MONDO') and parent.startswith('MONDO')):
                 continue
-            self.mondo[child].parents.add(parent)
-            self.mondo[parent].children.add(child)
+            if child in self.mondo:
+                self.mondo[child].parents.add(parent)
+            if parent in self.mondo:
+                self.mondo[parent].children.add(child)
 
     def make_name2mondoids(
             self, chain: Chain=Chain(),
